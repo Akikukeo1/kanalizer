@@ -247,7 +247,9 @@ def train():
     parser.add_argument("output", type=Path, nargs="?")
     args = parser.parse_args()
 
-    config = Config.from_dict(yaml.safe_load(args.config.read_text(encoding="utf-8-sig")))
+    config = Config.from_dict(
+        yaml.safe_load(args.config.read_text(encoding="utf-8-sig"))
+    )
     print(f"Using config: {config}")
 
     torch.manual_seed(config.seed)
