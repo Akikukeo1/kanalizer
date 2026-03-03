@@ -191,15 +191,17 @@ async function loadWords(params: {
     wordsArray = params.random.shuffle(wordsArray).slice(0, params.maxNumWords);
   }
 
-  const suspiciousWords = wordsArray.filter(
-    (word) => getSuspiciousWordReasons(word).length > 0,
+  const wordsWithReasons = wordsArray.map((word) => ({
+    word,
+    reasons: getSuspiciousWordReasons(word),
+  }));
+  const suspiciousWords = wordsWithReasons.filter(
+    ({ reasons }) => reasons.length > 0,
   );
   if (suspiciousWords.length > 0) {
-    for (const word of suspiciousWords.slice(0, 10)) {
+    for (const { word, reasons } of suspiciousWords.slice(0, 10)) {
       console.warn(
-        `Suspicious source word dropped: ${word} (${getSuspiciousWordReasons(
-          word,
-        ).join(",")})`,
+        `Suspicious source word dropped: ${word} (${reasons.join(",")})`,
       );
     }
     if (suspiciousWords.length > 10) {
@@ -209,9 +211,9 @@ async function loadWords(params: {
     }
   }
 
-  wordsArray = wordsArray.filter(
-    (word) => getSuspiciousWordReasons(word).length === 0,
-  );
+  wordsArray = wordsWithReasons
+    .filter(({ reasons }) => reasons.length === 0)
+    .map(({ word }) => word);
 
   return wordsArray;
 }

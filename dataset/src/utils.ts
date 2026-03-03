@@ -78,6 +78,7 @@ export const getSuspiciousWordReasons = (
 
   if (word.length > maxWordLength) {
     reasons.push("tooLong");
+    return reasons;
   }
 
   if (!/^[a-z]+$/i.test(word)) {
