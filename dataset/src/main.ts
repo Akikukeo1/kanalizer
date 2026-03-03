@@ -62,11 +62,10 @@ async function main() {
   const path = `${import.meta.dirname}/../../train/vendor/data.jsonl`;
   const allowedWords = new Set(words);
 
-  // Compute how many results will actually be written, taking into account
-  // allowed words and suspicious-word filtering.
-  const numWritten = [...allResults].filter(([word, pronunciation]) => {
+  // 実際に書き込まれる結果の数を計算します。許可された単語と疑わしい単語のフィルタリングを考慮します。
+  const numWritten = [...allResults].filter(([word]) => {
     if (!allowedWords.has(word)) return false;
-    const reasons = getSuspiciousWordReasons(word, pronunciation);
+    const reasons = getSuspiciousWordReasons(word);
     return reasons.length === 0;
   }).length;
 
