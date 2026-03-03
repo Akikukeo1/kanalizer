@@ -60,14 +60,24 @@ async function main() {
 
   console.log("4: Writing results...");
   const path = `${import.meta.dirname}/../../train/vendor/data.jsonl`;
+  const allowedWords = new Set(words);
+
+  // Compute how many results will actually be written, taking into account
+  // allowed words and suspicious-word filtering.
+  const numWritten = [...allResults].filter(([word, pronunciation]) => {
+    if (!allowedWords.has(word)) return false;
+    const reasons = getSuspiciousWordReasons(word, pronunciation);
+    return reasons.length === 0;
+  }).length;
+
   await writeResults({
     path,
     results: allResults,
-    allowedWords: new Set(words),
+    allowedWords,
   });
 
   console.log(
-    `${allResults.size} pronunciations inferred and written to ${path}`,
+    `${numWritten} pronunciations written to ${path} (out of ${allResults.size} inferred)`,
   );
 }
 
