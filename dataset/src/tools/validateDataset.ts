@@ -20,7 +20,7 @@ async function main() {
 
   const rl = createInterface({
     input: createReadStream(datasetPath, "utf-8"),
-    crlfDelay: Infinity,
+    crlfDelay: Number.POSITIVE_INFINITY,
   });
 
   for await (const line of rl) {
