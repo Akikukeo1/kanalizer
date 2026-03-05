@@ -1,4 +1,5 @@
-import fs from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { createInterface } from "node:readline";
 import { z } from "zod";
 import { filterPronunciations, getSuspiciousWordReasons } from "../utils.ts";
 
@@ -13,16 +14,21 @@ async function main() {
     throw new Error("Usage: pnpm run tools:validateDataset <dataset.jsonl>");
   }
 
-  const content = await fs.readFile(datasetPath, "utf-8");
-  const lines = content
-    .split("\n")
-    .filter((line) => line.trim().length > 0)
-    .map((line) => datasetLineSchema.parse(JSON.parse(line)));
-
+  let lineCount = 0;
   let suspiciousWordCount = 0;
   let invalidPronunciationCount = 0;
 
-  for (const { word, kata } of lines) {
+  const rl = createInterface({
+    input: createReadStream(datasetPath, "utf-8"),
+    crlfDelay: Number.POSITIVE_INFINITY,
+  });
+
+  for await (const line of rl) {
+    if (line.trim().length === 0) continue;
+
+    const { word, kata } = datasetLineSchema.parse(JSON.parse(line));
+    lineCount++;
+
     const suspiciousReasons = getSuspiciousWordReasons(word);
     if (suspiciousReasons.length > 0) {
       suspiciousWordCount++;
@@ -38,7 +44,7 @@ async function main() {
     }
   }
 
-  console.log(`Validated ${lines.length} lines in ${datasetPath}`);
+  console.log(`Validated ${lineCount} lines in ${datasetPath}`);
   console.log(
     `Warnings: suspiciousWord=${suspiciousWordCount}, invalidPronunciation=${invalidPronunciationCount}`,
   );
