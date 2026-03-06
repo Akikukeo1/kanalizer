@@ -332,7 +332,7 @@ async function inferWorker(params: {
     }
 
     const invalidWords = entries.filter(
-      (entry) => !(entry.word in expectedResults),
+      (entry) => !Object.hasOwn(expectedResults, entry.word),
     );
 
     params.queue.push(
